@@ -1,0 +1,23 @@
+[
+  {
+    "type": "expense",
+    "description": "Groceries from Supermarket",
+    "amount": 55.25,
+    "transaction_date": "2025-07-28",
+    "labels": "food,groceries"
+  },
+  {
+    "type": "saving",
+    "description": "Monthly Savings Deposit",
+    "amount": 500.00,
+    "transaction_date": "2025-07-25",
+    "labels": "savings,investing"
+  },
+  {
+    "type": "expense",
+    "description": "Electricity Bill",
+    "amount": 75.00,
+    "transaction_date": "2025-07-22",
+    "labels": "utilities,bills"
+  }
+]

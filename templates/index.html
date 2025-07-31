@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financial Tracker</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1300px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #2c3e50;
+        }
+        form {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #ecf0f1;
+            border-radius: 5px;
+        }
+        form input, form select {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+        }
+        form button {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            background-color: #3498db;
+            color: white;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        form button:hover {
+            background-color: #2980b9;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+        }
+        .expense { color: #c0392b; }
+        .saving { color: #27ae60; }
+        .summary {
+            padding: 20px;
+            background: #ecf0f1;
+            border-radius: 5px;
+            text-align: right;
+        }
+        .summary p {
+            margin: 5px 0;
+            font-size: 1.1em;
+        }
+        .summary .net-balance {
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        .actions a {
+            text-decoration: none;
+            padding: 5px 10px;
+            margin-right: 5px;
+            border-radius: 3px;
+            color: white;
+        }
+        .edit-btn { background-color: #f39c12; }
+        .delete-btn { background-color: #e74c3c; }
+        .label {
+            display: inline-block;
+            background-color: #3498db;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            margin-right: 4px;
+        }
+        .filter-container {
+            margin-bottom: 20px;
+        }
+        .filter-container a {
+            text-decoration: none;
+            padding: 8px 15px;
+            margin-right: 10px;
+            border-radius: 20px;
+            background-color: #ecf0f1;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+        .filter-container a.active {
+            background-color: #3498db;
+            color: white;
+        }
+        .flash-messages {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 20px 0;
+        }
+        .flash-messages li {
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            color: #fff;
+        }
+        .flash-messages .success {
+            background-color: #2ecc71;
+        }
+        .flash-messages .error {
+            background-color: #e74c3c;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Financial Tracker</h1>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <ul class="flash-messages">
+            {% for category, message in messages %}
+              <li class="{{ category }}">{{ message }}</li>
+            {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}
+
+        <form action="/add" method="post">
+            <h2>Add New Transaction</h2>
+            <input type="text" name="description" placeholder="Description" required>
+            <input type="number" name="amount" placeholder="Amount" step="0.01" min="0.01" required>
+            <input type="date" name="transaction_date" value="{{ today }}" required>
+            <input type="text" name="labels" placeholder="Labels (comma-separated)">
+            <select name="type">
+                <option value="expense">Expense</option>
+                <option value="saving">Saving</option>
+            </select>
+            <button type="submit">Add Transaction</button>
+        </form>
+
+        <form action="/import" method="post" enctype="multipart/form-data">
+            <h2>Import Transactions</h2>
+            <input type="file" name="file" accept=".json,.csv" required>
+            <button type="submit">Import from File</button>
+        </form>
+
+        <h2>Transactions</h2>
+        <div class="filter-container">
+            <a href="{{ url_for('index') }}" class="{{ 'active' if not selected_label else '' }}">All</a>
+            {% for label in labels %}
+            <a href="{{ url_for('index', label=label.name) }}" class="{{ 'active' if selected_label == label.name else '' }}">{{ label.name }}</a>
+            {% endfor %}
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Description</th>
+                    <th>Amount</th>
+                    <th>Labels</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for transaction in transactions %}
+                <tr>
+                    <td>{{ transaction.transaction_date }}</td>
+                    <td class="{{ transaction.type }}">{{ transaction.type.capitalize() }}</td>
+                    <td>{{ transaction.description }}</td>
+                    <td>${{ "%.2f"|format(transaction.amount) }}</td>
+                    <td>
+                        {% if transaction.labels %}
+                            {% for label in transaction.labels.split(',') %}
+                                <span class="label">{{ label }}</span>
+                            {% endfor %}
+                        {% endif %}
+                    </td>
+                    <td class="actions">
+                        <a href="{{ url_for('edit_transaction_route', trans_id=transaction.id) }}" class="edit-btn">Edit</a>
+                        <a href="{{ url_for('delete_transaction_route', trans_id=transaction.id) }}" class="delete-btn" onclick="return confirm('Are you sure you want to delete this item?');">Delete</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="summary">
+            <h2>Summary</h2>
+            <p>Total Savings: <span class="saving">${{ "%.2f"|format(totals.savings) }}</span></p>
+            <p>Total Expenses: <span class="expense">${{ "%.2f"|format(totals.expenses) }}</span></p>
+            <hr>
+            <p class="net-balance">Net Balance: <span>${{ "%.2f"|format(totals.net) }}</span></p>
+        </div>
+    </div>
+</body>
+</html>

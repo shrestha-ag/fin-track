@@ -1,0 +1,4 @@
+type,description,amount,transaction_date,labels
+expense,"Groceries from Supermarket",55.25,2025-07-28,"food,groceries"
+saving,"Monthly Savings Deposit",500.00,2025-07-25,"savings,investing"
+expense,"Electricity Bill",75.00,2025-07-22,"utilities,bills"
