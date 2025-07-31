@@ -1,0 +1,13 @@
+# Poetry
+.poetry/
+poetry.lock
+pyproject.toml
+
+# Python
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Database
+finance.db
