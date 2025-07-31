@@ -96,6 +96,7 @@
             border-radius: 12px;
             font-size: 0.8em;
             margin-right: 4px;
+            margin-bottom: 4px;
         }
         .filter-container {
             margin-bottom: 20px;
@@ -108,6 +109,8 @@
             background-color: #ecf0f1;
             color: #2c3e50;
             font-weight: 500;
+            display: inline-block;
+            margin-bottom: 5px;
         }
         .filter-container a.active {
             background-color: #3498db;
@@ -149,8 +152,8 @@
         <form action="/add" method="post">
             <h2>Add New Transaction</h2>
             <input type="text" name="description" placeholder="Description" required>
-            <input type="number" name="amount" placeholder="Amount" step="0.01" min="0.01" required>
-            <input type="date" name="transaction_date" value="{{ today }}" required>
+            <input type="text" name="amount" placeholder="Amount(s), comma-separated (e.g., 50, -10.50)" required>
+            <input type="date" name="transaction_date" value="{{ today }}">
             <input type="text" name="labels" placeholder="Labels (comma-separated)">
             <select name="type">
                 <option value="expense">Expense</option>

@@ -235,11 +235,19 @@ def add_transaction_route():
     """Handles adding a new transaction from the form."""
     trans_type = request.form['type']
     description = request.form['description']
-    amount = float(request.form['amount'])
-    transaction_date = request.form['transaction_date']
+    amount_str = request.form['amount']
+    transaction_date = request.form.get('transaction_date') or datetime.date.today().isoformat()
     labels_str = request.form.get('labels', '')
-    
-    add_transaction_db(trans_type, description, amount, transaction_date, labels_str)
+
+    try:
+        # Process comma-separated amounts
+        amounts = [float(x.strip()) for x in amount_str.split(',') if x.strip()]
+        total_amount = sum(amounts)
+    except ValueError:
+        flash('Invalid amount. Please enter numbers only.', 'error')
+        return redirect(url_for('index'))
+
+    add_transaction_db(trans_type, description, total_amount, transaction_date, labels_str)
     
     return redirect(url_for('index'))
 
